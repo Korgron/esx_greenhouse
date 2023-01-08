@@ -54,6 +54,24 @@ With Greenhouses, you can buy seeds and plant them. These planted seeds will gro
 
 - after updating the sql, following the steps of the normal Installation.
 
+### Adding plants to Greenhouses
+
+To add purchasable seeds to a greenhouse, you need to add them to the `greenhouse_plants` table in your MySQL / MariaDB database.
+
+
+There you will find two template plants tied to greenhouse_7.
+Each plant needs a name, a label, a price, a sell price, a maximum reward, a weight in g, a seed weight in g and the greenhouse id.
+
+
+Example:
+
+| (name)     | (label)     | (price)     | (sellprice)     | (maximum reward) | (plant weight) | (seed weight) | (Greenhouse) |
+| ---------- | ----------- | ----------- | --------------- | ---------------- | -------------- | ------------- | ------------ |
+| pgh_p_name | pgh_p_label | pgh_p_price | pgh_p_sellprice | pgh_p_maxProduce | pgh_p_weight   | p_weight      | f_pgh_id     |
+| banana     | Banana      | 15          | 190             | 6                | 200            | 5             | 1            |
+
+
+
 ---
 
 ## Available languages
