@@ -1,12 +1,10 @@
 {
-    "name": "fivem-typescript",
-    "version": "1.1.0",
-    "author": "https://github.com/giantcard5",
-    "scripts": {
-        "build": "webpack --mode production",
-        "watch": "webpack watch --mode development"
+    "name": "esx_greenhouse",
+    "version": "1.0.0",
+    "description": "ESX Skript for ESX Framework adding Greenhouses",
+    "dependencies": {
+    "@overextended/oxmysql": "^1.1.1"
     },
-    "license": "MIT",
     "devDependencies": {
         "@citizenfx/client": "2.0.5715-1",
         "@citizenfx/server": "2.0.5715-1",
@@ -16,7 +14,18 @@
         "webpack": "^5.16.0",
         "webpack-cli": "^4.4.0"
     },
-    "dependencies": {
-        "@overextended/oxmysql": "^1.1.1"
-    }
+    "scripts": {
+        "build": "webpack --mode production",
+        "watch": "webpack watch --mode development"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Korgron/esx_greenhouse.git"
+    },
+    "author": "https://github.com/Korgron",
+    "license": "GPL-3.0",
+    "bugs": {
+        "url": "https://github.com/Korgron/esx_greenhouse/issues"
+    },
+    "homepage": "https://github.com/Korgron/esx_greenhouse#readme"
 }

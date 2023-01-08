@@ -1,4 +1,5 @@
 # ESX Greenhouses
+
 This FiveM ESX script is adding Greenhouses to your Server.
 With Greenhouses, you can buy seeds and plant them. These planted seeds will grow over time into plants that can be harvested and sold.
 
@@ -15,27 +16,21 @@ With Greenhouses, you can buy seeds and plant them. These planted seeds will gro
 
 - Serverversion 5949 or higher
 
-
-
 ## Build/Development Requirements
 
 - Node v14 or higher
 
 - Yarn
 
-
-
 ---
 
-## Getting Started Server
+## Getting Started - Download & Installation
 
 ### Download
 
 * Download esx_greenhouse.zip from https://github.com/Korgron/esx_greenhouse/releases/latest
 
 * unpack zip file and put the created folder in the `resources/` directory
-
-
 
 ### Installation
 
@@ -47,15 +42,11 @@ With Greenhouses, you can buy seeds and plant them. These planted seeds will gro
   ensure esx_greenhouse
   ```
 
-
-
 ### SQL Update at resource Update
 
 - To update esx_greenhouse, download the newer version and run `update.sql` unless the above readme says otherwise.
 
 - after updating the sql, following the steps of the normal Installation.
-
-
 
 ---
 
@@ -63,11 +54,9 @@ With Greenhouses, you can buy seeds and plant them. These planted seeds will gro
 
 - German
 
-
-
 ---
 
-## Getting Started Development
+## Getting Started - Development
 
 ### Install Dependencies
 
@@ -76,8 +65,6 @@ Navigate into esx_greenhouse resource and execute the following command, to inst
 ```batch
 yarn install
 ```
-
-
 
 ### Development
 
@@ -94,14 +81,10 @@ yarn watch
 *This script still requires you restart the resource for the
 changes to be reflected in-game*
 
-
-
 #### Entry Points
 
 **Client** - `./client/index.ts`
 **Server** - `./server/index.ts`
-
-
 
 #### Production Build
 
@@ -114,3 +97,21 @@ yarn build
 ```
 
 
+
+---
+
+## Legal
+
+### License
+
+esx_greenhouse - ESX Skript for ESX Framework used in FiveM
+
+Copyright (C) 2022 Korgron
+
+This program Is free software: you can redistribute it And/Or modify it under the terms Of the GNU General Public License As published by the Free Software Foundation, either version 3 Of the License, Or (at your option) any later version.
+
+
+This program Is distributed In the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty Of MERCHANTABILITY Or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License For more details.
+
+
+You should have received a copy Of the GNU General Public License along with this program. If Not, see http://www.gnu.org/licenses/.
