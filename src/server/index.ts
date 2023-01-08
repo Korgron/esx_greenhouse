@@ -39,9 +39,9 @@ ESX.RegisterServerCallback("esx_greenhouse?SellGreenhouse", async (src, cb, hous
     const xPlayer = ESX.GetPlayerFromId(src)
     xPlayer.addMoney(house.price)
 
-    await oxmysql.prepare("DELETE FROM pxl_greenhouse_owner WHERE f_identifier = ? AND f_pgh_id = ?", [xPlayer.getIdentifier(), house.id])
-    await oxmysql.prepare("DELETE FROM pxl_greenhouse_plants_zones WHERE f_identifier = ? AND f_pgh_id = ?", [xPlayer.getIdentifier(), house.id])
-    await oxmysql.prepare("DELETE FROM pxl_greenhouse_cargo WHERE f_identifier = ? AND f_pgh_id = ?", [xPlayer.getIdentifier(), house.id])
+    await oxmysql.prepare("DELETE FROM greenhouse_owner WHERE f_identifier = ? AND f_pgh_id = ?", [xPlayer.getIdentifier(), house.id])
+    await oxmysql.prepare("DELETE FROM greenhouse_plants_zones WHERE f_identifier = ? AND f_pgh_id = ?", [xPlayer.getIdentifier(), house.id])
+    await oxmysql.prepare("DELETE FROM greenhouse_cargo WHERE f_identifier = ? AND f_pgh_id = ?", [xPlayer.getIdentifier(), house.id])
 
     var l_extra = 0
 
@@ -55,7 +55,9 @@ ESX.RegisterServerCallback("esx_greenhouse?SellGreenhouse", async (src, cb, hous
         }
     }
 
-    xPlayer.addMoney(l_extra)
+    if (l_extra > 0) {
+        xPlayer.addMoney(l_extra)
+    }
     cb(true, house.price, l_extra)
 })
 
@@ -79,10 +81,10 @@ ESX.RegisterServerCallback("esx_greenhouse?SellCargo", async (src, cb, object, h
             let amount = obj.pgh_c_amount - object.value
 
             if (amount <= 0) {
-                await oxmysql.prepare("DELETE FROM pxl_greenhouse_cargo WHERE pgh_c_id = ?", [obj.pgh_c_id])
+                await oxmysql.prepare("DELETE FROM greenhouse_cargo WHERE pgh_c_id = ?", [obj.pgh_c_id])
                 cashout = Math.floor((obj.pgh_c_amount*object.data.pgh_p_weight/1000)*object.data.pgh_p_sellprice)
             } else {
-                await oxmysql.prepare("UPDATE pxl_greenhouse_cargo SET pgh_c_amount = ? WHERE pgh_c_id = ?", [amount, obj.pgh_c_id])
+                await oxmysql.prepare("UPDATE greenhouse_cargo SET pgh_c_amount = ? WHERE pgh_c_id = ?", [amount, obj.pgh_c_id])
             }
 
             xPlayer.addMoney(cashout)
@@ -102,25 +104,25 @@ ESX.RegisterServerCallback("esx_greenhouse?BuySeeds", async (src, cb, object, ho
     const price = object.data.pgh_p_price * object.value
 
     if (xPlayer.getMoney() < price) {cb(false);return}
-    await oxmysql.prepare("INSERT INTO pxl_greenhouse_cargo SET pgh_c_amount = ?, f_pgh_p_id = ?, f_pgh_ct_id = ?, f_pgh_id = ?, f_identifier = ?", [object.value, object.data.pgh_p_id, 2, house.id, xPlayer.getIdentifier()])
+    await oxmysql.prepare("INSERT INTO greenhouse_cargo SET pgh_c_amount = ?, f_pgh_p_id = ?, f_pgh_ct_id = ?, f_pgh_id = ?, f_identifier = ?", [object.value, object.data.pgh_p_id, 2, house.id, xPlayer.getIdentifier()])
     xPlayer.removeMoney(price)
     cb(true, object.data.pgh_p_label, weight, price)
 })
 
 ESX.RegisterServerCallback("esx_greenhouse?PlantSeed", async (src, cb, zone, house, data) => {
 
-    await oxmysql.prepare("UPDATE pxl_greenhouse_plants_zones SET pgh_z_planted = CURRENT_TIMESTAMP(), pgh_z_last_growed = CURRENT_TIMESTAMP(), f_pgh_p_id = ?, f_pgh_ps_id = 1 WHERE pgh_z_id = ?", [data.pgh_p_id, zone.pgh_z_id])
-    await oxmysql.prepare("UPDATE pxl_greenhouse_cargo SET pgh_c_amount = ? WHERE pgh_c_id = ?", [data.pgh_c_amount - 1, data.pgh_c_id])
+    await oxmysql.prepare("UPDATE greenhouse_plants_zones SET pgh_z_planted = CURRENT_TIMESTAMP(), pgh_z_last_growed = CURRENT_TIMESTAMP(), f_pgh_p_id = ?, f_pgh_ps_id = 1 WHERE pgh_z_id = ?", [data.pgh_p_id, zone.pgh_z_id])
+    await oxmysql.prepare("UPDATE greenhouse_cargo SET pgh_c_amount = ? WHERE pgh_c_id = ?", [data.pgh_c_amount - 1, data.pgh_c_id])
 
     if ((data.pgh_c_amount-1) <= 0) {
-        await oxmysql.prepare("DELETE FROM pxl_greenhouse_cargo WHERE pgh_c_id = ?", [data.pgh_c_id])
+        await oxmysql.prepare("DELETE FROM greenhouse_cargo WHERE pgh_c_id = ?", [data.pgh_c_id])
     }
 
     cb(true)
 })
 
 ESX.RegisterServerCallback("esx_greenhouse?DestroyPlant", async (src, cb, zone, house) => {
-    await oxmysql.prepare("UPDATE pxl_greenhouse_plants_zones SET pgh_z_planted = (null), pgh_z_last_growed = (null), f_pgh_p_id = 0, f_pgh_ps_id = 0, pgh_z_amount = 0 WHERE pgh_z_id = ?", [zone.pgh_z_id])
+    await oxmysql.prepare("UPDATE greenhouse_plants_zones SET pgh_z_planted = (null), pgh_z_last_growed = (null), f_pgh_p_id = 0, f_pgh_ps_id = 0, pgh_z_amount = 0 WHERE pgh_z_id = ?", [zone.pgh_z_id])
     cb(true)
 })
 
@@ -133,15 +135,15 @@ ESX.RegisterServerCallback("esx_greenhouse?HarvestPlant", async (src, cb, zone, 
 
         if (obj.f_pgh_ct_id == 1 && obj.pgh_p_name == zone.pgh_p_name) {
             var amount = obj.pgh_c_amount + zone.pgh_z_amount
-            await oxmysql.prepare("UPDATE pxl_greenhouse_cargo SET pgh_c_amount = ? WHERE pgh_c_id = ?", [amount, obj.pgh_c_id])
-            await oxmysql.prepare("UPDATE pxl_greenhouse_plants_zones SET pgh_z_planted = (null), pgh_z_last_growed = (null), f_pgh_p_id = 0, f_pgh_ps_id = 0, pgh_z_amount = 0 WHERE pgh_z_id = ?", [zone.pgh_z_id])
+            await oxmysql.prepare("UPDATE greenhouse_cargo SET pgh_c_amount = ? WHERE pgh_c_id = ?", [amount, obj.pgh_c_id])
+            await oxmysql.prepare("UPDATE greenhouse_plants_zones SET pgh_z_planted = (null), pgh_z_last_growed = (null), f_pgh_p_id = 0, f_pgh_ps_id = 0, pgh_z_amount = 0 WHERE pgh_z_id = ?", [zone.pgh_z_id])
             cb(true)
             return
         }
     }
     
-    await oxmysql.prepare("INSERT INTO pxl_greenhouse_cargo SET pgh_c_amount = ?, f_pgh_p_id = ?, f_pgh_ct_id = ?, f_pgh_id = ?, f_identifier = ?", [zone.pgh_z_amount, zone.pgh_p_id, 1, house.id, xPlayer.getIdentifier()])
-    await oxmysql.prepare("UPDATE pxl_greenhouse_plants_zones SET pgh_z_planted = (null), pgh_z_last_growed = (null), f_pgh_p_id = 0, f_pgh_ps_id = 0, pgh_z_amount = 0 WHERE pgh_z_id = ?", [zone.pgh_z_id])
+    await oxmysql.prepare("INSERT INTO greenhouse_cargo SET pgh_c_amount = ?, f_pgh_p_id = ?, f_pgh_ct_id = ?, f_pgh_id = ?, f_identifier = ?", [zone.pgh_z_amount, zone.pgh_p_id, 1, house.id, xPlayer.getIdentifier()])
+    await oxmysql.prepare("UPDATE greenhouse_plants_zones SET pgh_z_planted = (null), pgh_z_last_growed = (null), f_pgh_p_id = 0, f_pgh_ps_id = 0, pgh_z_amount = 0 WHERE pgh_z_id = ?", [zone.pgh_z_id])
 
     cb(true)
 })
@@ -150,7 +152,7 @@ ESX.RegisterServerCallback("esx_greenhouse?HarvestPlant", async (src, cb, zone, 
 
 //#region Runtime
 setInterval(async () => {
-    var zones = await oxmysql.query("SELECT * FROM pxl_greenhouse_plants_zones LEFT JOIN pxl_greenhouse_plants ON pxl_greenhouse_plants_zones.f_pgh_p_id = pxl_greenhouse_plants.pgh_p_id LEFT JOIN pxl_greenhouse ON pxl_greenhouse_plants_zones.f_pgh_id = pxl_greenhouse.pgh_id WHERE pgh_z_last_growed IS NOT NULL", [])
+    var zones = await oxmysql.query("SELECT * FROM greenhouse_plants_zones LEFT JOIN greenhouse_plants ON greenhouse_plants_zones.f_pgh_p_id = greenhouse_plants.pgh_p_id LEFT JOIN greenhouse ON greenhouse_plants_zones.f_pgh_id = greenhouse.pgh_id WHERE pgh_z_last_growed IS NOT NULL", [])
 
     if (zones != undefined && zones.length == undefined) {zones = [zones]}
     if (zones == undefined) {zones = []}
@@ -167,7 +169,7 @@ setInterval(async () => {
 
         if (pMr >= 40 && obj.f_pgh_ps_id < 4) {
             var weight = Math.floor((obj.pgh_p_maxProduce/3)*(obj.f_pgh_ps_id))
-            await oxmysql.prepare("UPDATE pxl_greenhouse_plants_zones SET pgh_z_amount = ?, pgh_z_last_growed = CURRENT_TIMESTAMP(), f_pgh_ps_id = ? WHERE pgh_z_id = ?", [weight, obj.f_pgh_ps_id+1, obj.pgh_z_id])
+            await oxmysql.prepare("UPDATE greenhouse_plants_zones SET pgh_z_amount = ?, pgh_z_last_growed = CURRENT_TIMESTAMP(), f_pgh_ps_id = ? WHERE pgh_z_id = ?", [weight, obj.f_pgh_ps_id+1, obj.pgh_z_id])
             obj.f_pgh_ps_id = obj.f_pgh_ps_id + 1
 
             if (obj.f_pgh_ps_id == 4 && xPlayer) {
