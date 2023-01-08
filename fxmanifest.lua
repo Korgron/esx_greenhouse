@@ -13,5 +13,7 @@ dependencies {
     '/server:5949',
 	'/onesync',
     "oxmysql",
-    'es_extended'
+    'es_extended',
+    'esx_textui',
+    'esx_multicharacter'
 }
