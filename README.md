@@ -8,9 +8,9 @@ With Greenhouses, you can buy seeds and plant them. These planted seeds will gro
 
 ## Server Requirements
 
-- [esx_legacy v1.8.5 or higher](https://github.com/esx-framework/esx-legacy/releases/latest)
+- [esx_legacy](https://github.com/esx-framework/esx-legacy/releases/latest)  v1.8.5 or higher
 
-- [oxmysql v2.3.0 or higher](https://github.com/overextended/oxmysql/releases/latest)
+- [oxmysql](https://github.com/overextended/oxmysql/releases/latest) v2.3.0 or higher
 
 - Onesync enabled
 
