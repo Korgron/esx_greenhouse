@@ -88,7 +88,7 @@ ESX.RegisterServerCallback("esx_greenhouse?SellCargo", async (src, cb, object, h
             }
 
             xPlayer.addMoney(cashout)
-            cb(true, object.data.pgh_p_label, object.value*object.data.pgh_p_weight, cashout)
+            cb(true, object.data.pgh_p_label, object.value, object.data.pgh_p_weight, cashout)
             return
         }
     }

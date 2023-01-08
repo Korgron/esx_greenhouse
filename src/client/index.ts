@@ -40,38 +40,40 @@ function __init() {
 function _InitGreenhouseMainMenu(house: Greenhouse) {
     CurrentGreenhouse = house
 
-    ESX.TriggerServerCallback("esx_greenhouse?IsOwnerOfGreenhouse", (isOwner) => {
-        switch (isOwner) {
-            case true:  OpenMainGreenhouseMenu();break;
-            case false: OpenBuyGreenhouseMenu();break;        
-            default:    OpenBuyGreenhouseMenu();break;
-        }
+    ESX.TriggerServerCallback("esx_greenhouse?GetDataOfGreenhouse", (data) => {
+        ESX.TriggerServerCallback("esx_greenhouse?IsOwnerOfGreenhouse", (isOwner) => {
+            switch (isOwner) {
+                case true:  OpenMainGreenhouseMenu();break;
+                case false: OpenBuyGreenhouseMenu();break;        
+                default:    OpenBuyGreenhouseMenu();break;
+            }
+        }, CurrentGreenhouse.id)
+
+        CurrentGreenhouse.data = data
     }, CurrentGreenhouse.id)
+
+    
 }
 
 //#region MainMenu
 function OpenMainGreenhouseMenu() {
-    ESX.TriggerServerCallback("esx_greenhouse?GetDataOfGreenhouse", (data) => {
-        CurrentGreenhouse.data = data
-    }, CurrentGreenhouse.id)
-
     ESX.UI.Menu.Open("default", GetCurrentResourceName(), "greenhouse_main_menu", {
         title: "Gewächshaus",
         elements: [
-            {name: "amount_zones", label: "[<span style='color:#1ABC9C'>i</span>] Anzahl Stellplätze: <span style='color:#1ABC9C'>"+CurrentGreenhouse.zones+"</span>"},
-            {name: "zones", label: "[<span style='color:#E54363'>&#10095;</span>] Stellplätze"},
-            {name: "cargo", label: "[<span style='color:#E54363'>&#10095;</span>]  Lagerplätze"},
-            {name: "shop", label: "[<span style='color:#E54363'>&#10095;</span>] Shop"},
-            {name: "extras", label: "[<span style='color:#E54363'>&#10095;</span>] <span style='color:gray;text-decoration:line-through;font-style: italic'>Erweiterungen</span>"},
-            {name: "sell", label: " [<span style='color:#E54363'>&#10095;</span>] <span style='color:#E54363'>Verkaufen</span>"}
+            {name: "l_zones", label: MenuLabel("info", "Anzahl Stellplätze: "+MenuSpan("#1ABC9C", CurrentGreenhouse.zones))},
+            {name: "a_zones", label: MenuLabel("action", "Stellplätze")},
+            {name: "a_cargo", label: MenuLabel("action", "Lagerplätze")},
+            {name: "a_shop", label:  MenuLabel("action", "Shop")},
+            {name: "a_extras", label: "[<span style='color:#E54363'>&#10095;</span>] <span style='color:gray;text-decoration:line-through;font-style: italic'>Erweiterungen</span>"},
+            {name: "a_sell", label: MenuLabel("action", MenuSpan("#E54363", "Verkaufen"))}
         ]
     }, (data, menu) => {
         switch (data.current.name) {
-            case "zones": OpenZonesMenu();break;
-            case "sell": OpenSellGreenhouseMenu();break;
-            case "cargo": OpenCargoMenu();break;
-            case 'shop': OpenShopMenu();break;
-            case 'extras': GreenhouseNotify("Aktuell kann dein Gewächshaus nicht erweitert werden. Wir geben dir bescheid wenn es soweit ist")
+            case "a_zones": OpenZonesMenu();break;
+            case "a_sell": OpenSellGreenhouseMenu();break;
+            case "a_cargo": OpenCargoMenu();break;
+            case 'a_shop': OpenShopMenu();break;
+            case 'a_extras': GreenhouseNotify("Aktuell kann dein Gewächshaus nicht erweitert werden. Wir geben dir bescheid wenn es soweit ist")
             default:
                 break;
         }
@@ -90,7 +92,7 @@ function OpenZonesMenu() {
         let plantname = (obj.pgh_p_label) ? obj.pgh_p_label : "frei"
         elements.push({
             name: obj.pgh_z_name,
-            label: "[<span style='color:#E54363'>&#10095;</span>]" + obj.pgh_z_label + " (<span style='color:#1ABC9C'>" + plantname + "</span>)",
+            label: MenuLabel("action", obj.pgh_z_label+" ("+MenuSpan("#1ABC9C", plantname)+")"),
             index: i,
             data: obj
         })
@@ -119,25 +121,27 @@ function OpenPlantMenu(zone) {
     var last_growed = zone.pgh_z_last_growed ? zone.pgh_z_last_growed : "gar nicht"
 
     var elements = [
-        {name: "l_plant",label: "[<span style='color:#1ABC9C'>i</span>] Pflanze: <span style='color:#1ABC9C'>"+label+"</span>",type: "default"},
-        {name: "l_amount",label: "[<span style='color:#1ABC9C'>i</span>] Ertrag: <span style='color:#1ABC9C'>"+amount+"g</span>",type: "default"},
-        {name: "l_stage",label: "[<span style='color:#1ABC9C'>i</span>] Wachstumsstufe: <span style='color:#1ABC9C'>"+stage+"</span>",type: "default"},
-        {name: "l_planted",label: "[<span style='color:#1ABC9C'>i</span>] Gepflanzt: <span style='color:#1ABC9C'>"+planted+"</span>",type: "default"},
-        {name: "l_last_growed",label: "[<span style='color:#1ABC9C'>i</span>] Gewachsen: <span style='color:#1ABC9C'>"+last_growed+"</span>",type: "default"},
-        //{name: "l_percent", label: `<div style="height:22px;width:100%;background-color:white"><div style="height:100%;width:40%;background-color:#1ABC9C;"></div></div>`, type:"springText"},   ====> IDEA: Percentagebar instead of text
-        {name: "l_number",label: "[<span style='color:#1ABC9C'>i</span>] Pflanzen-Nr: <span style='color:#1ABC9C'>"+id+"</span>",type: "default"},
+        {name: "l_plant",label: MenuLabel("info", "Pflanze: "+MenuSpan("#1ABC9C", label))},
+        {name: "l_amount",label: MenuLabel("info", "Ertrag: "+MenuSpan("#1ABC9C", amount)+"g")},
+        {name: "l_stage",label: MenuLabel("info", "Wachstumsstufe: "+MenuSpan("#1ABC9C", stage))},
+        {name: "l_planted",label: MenuLabel("info", "Gepflanzt: "+MenuSpan("#1ABC9C", planted))},
+        {name: "l_last_growed",label: MenuLabel("info", "Gewachsen: "+MenuSpan("#1ABC9C", last_growed))},
+        //{name: "l_percent", label: `<div style="height:22px;width:100%;background-color:white"><div style="height:100%;width:40%;background-color:#1ABC9C;"></div></div>`},   ====> IDEA: Percentage-bar instead of text for growth-stage
+        {name: "l_number",label: MenuLabel("info", "Pflanzen-Nr: "+MenuSpan("#1ABC9C", id))}
     ]
 
 
     if (label === "keine" || stage === "keine") {
-        elements.push({name: "a_plant", label: "[<span style='color:#E54363'>&#10095;</span>] <span style='color:#E54363'>Anbauen</span>", type: "default"})
+        elements.push({name: "a_plant", label: MenuLabel("action", MenuSpan("#E54363", "Anbauen"))})
     } else if (zone.pgh_ps_name == "grow_4") {
-        elements.push({name: "a_destroy", label: "[<span style='color:#E54363'>&#10095;</span>] <span style='color:#E54363'>Zerstören</span>", type: "default"})
-        elements.push({name: "a_harvest", label: "[<span style='color:#E54363'>&#10095;</span>] <span style='color:#E54363'>Ernten</span>", type: "default"})
+        elements.push({name: "a_destroy", label: MenuLabel("action", MenuSpan("#E54363", "Zerstören"))})
+        elements.push({name: "a_harvest", label: MenuLabel("action", MenuSpan("#E54363", "Ernten"))})
     } else {
-        elements.push({name: "a_destroy", label: "[<span style='color:#E54363'>&#10095;</span>] <span style='color:#E54363'>Zerstören</span>", type: "default"})
-        elements.push({name: "a_harvest_blocked", label: "[<span style='color:#E54363'>&#10095;</span>] <span style='color:gray;text-decoration:line-through;font-style: italic'>Ernten</span>", type: "default"})
+        elements.push({name: "a_destroy", label: MenuLabel("action", MenuSpan("#E54363", "Zerstören"))})
+        elements.push({name: "a_harvest_blocked", label: "[<span style='color:#E54363'>&#10095;</span>] <span style='color:gray;text-decoration:line-through;font-style: italic'>Ernten</span>"})
     }
+
+    
 
 
     ESX.UI.Menu.Open("default", GetCurrentResourceName(), "plant_info_menu", {
@@ -170,7 +174,7 @@ function OpenPlantCropsMenu(zone) {
     var elements:MenuElement[] = [
         {
             name: "weight",
-            label: "[<span style='color:#1ABC9C'>i</span>] Platzverbrauch: <span style='color:#1ABC9C'>"+currWeight.toLocaleString("us-US")+"</span> / <span style='color:#E54363'>"+CurrentGreenhouse.maxCargo.toLocaleString("us-US")+"</span>g",
+            label: MenuLabel("info", "Platzverbrauch: "+MenuSpan("#1ABC9C", currWeight.toFixed(2)+"g / "+MenuSpan("#E54363", CurrentGreenhouse.maxCargo.toFixed(2)+"g"))),
             type: "default",
         }
     ]
@@ -183,7 +187,7 @@ function OpenPlantCropsMenu(zone) {
             elements.push({
                 name: obj.pgh_p_name,
                 data: obj,
-                label: "<span style='color:#E54363'>"+(obj.pgh_c_amount*obj.p_weight)+"</span>g "+itemname,
+                label: MenuSpan("#E54363", (obj.pgh_c_amount*obj.p_weight)+"g ")+itemname,
                 min: 1,
                 max: obj.pgh_c_amount,
                 value: 1,
@@ -192,7 +196,7 @@ function OpenPlantCropsMenu(zone) {
         }
     }
 
-    ESX.UI.Menu.Open("default", GetCurrentResourceName(), "cargo_menu", {
+    ESX.UI.Menu.Open("default", GetCurrentResourceName(), "plant_crops_menu", {
         title: "Lager",
         elements: elements
     }, (data, menu) => {
@@ -248,7 +252,7 @@ function OpenCargoMenu() {
     var elements:MenuElement[] = [
         {
             name: "weight",
-            label: "[<span style='color:#1ABC9C'>i</span>] Platzverbrauch: <span style='color:#1ABC9C'>"+currWeight.toLocaleString("us-US")+"</span> / <span style='color:#E54363'>"+CurrentGreenhouse.maxCargo.toLocaleString("us-US")+"</span>g",
+            label: MenuLabel("info", "Platzverbrauch: "+MenuSpan("#1ABC9C", currWeight.toFixed(2)+"g / "+MenuSpan("#E54363", CurrentGreenhouse.maxCargo.toFixed(2)+"g"))),
             type: "default",
         }
     ]
@@ -261,7 +265,7 @@ function OpenCargoMenu() {
             elements.push({
                 name: obj.pgh_p_name,
                 data: obj,
-                label: "<span style='color:#E54363'>"+(obj.pgh_c_amount*obj.p_weight)+"</span>g "+itemname,
+                label: MenuSpan("#E54363", (obj.pgh_c_amount*obj.p_weight)+"g ") + itemname,
                 min: 1,
                 max: obj.pgh_c_amount,
                 value: 1,
@@ -271,7 +275,7 @@ function OpenCargoMenu() {
         elements.push({
             name: obj.pgh_p_name,
             data: obj,
-            label: "<span style='color:#1ABC9C'>"+(1*obj.pgh_p_weight)+"</span>g/<span style='color:#E54363'>"+(obj.pgh_c_amount*obj.pgh_p_weight)+"</span>g "+itemname,
+            label: MenuSpan("#1ABC9C", (1*obj.pgh_p_weight)+"g") + " / " + MenuSpan("#E54363", (obj.pgh_c_amount*obj.pgh_p_weight)+"g ") + itemname,
             type: "slider",
             min: 1,
             max: obj.pgh_c_amount,
@@ -289,7 +293,7 @@ function OpenCargoMenu() {
         menu.close()
     }, (data, menu) => {
         if (data.current.name == "weight") {return}
-        var label = "<span style='color:#1ABC9C'>"+(data.current.value*data.current.data.pgh_p_weight)+"</span>/<span style='color:#E54363'>"+(data.current.max*data.current.data.pgh_p_weight)+"</span>g "+data.current.data.pgh_p_label
+        var label = "<span style='color:#1ABC9C'>"+(data.current.value*data.current.data.pgh_p_weight)+"</span>g / <span style='color:#E54363'>"+(data.current.max*data.current.data.pgh_p_weight)+"</span>g "+data.current.data.pgh_p_label
         if (data.current.label == label || data.current.data.pgh_ct_name == "seed") {return}
         let index = 0
         for (let i in data.elements) {
@@ -313,18 +317,19 @@ function OpenCargoSellMenu(object) {
     ESX.UI.Menu.Open("default", GetCurrentResourceName(), "yield_sell_menu", {
         title: "Lager",
         elements: [
-            {name: "i_crop", label: "Pflanze: <span style='color:#1ABC9C'>"+object.data.pgh_p_label+"</span>", type: "springText"},
-            {name: "i_selected", label: "Ertrag: <span style='color:#1ABC9C'>"+crop+"</span>g", type: "springText"},
-            {name: "i_win", label: "Summe: $<span style='color:#1ABC9C'>"+win+"</span>", type: "springText"},
-            {name: "a_submit", label: "<span style='color:#E54363'>Verkaufen</span>", arrow: true}
+            {name: "i_crop", label: MenuLabel("info", "Pflanze: "+MenuSpan("#1ABC9C", object.data.pgh_p_label))},
+            {name: "i_selected", label: MenuLabel("info", "Ertrag: "+MenuSpan("#1ABC9C", crop)+"g")},
+            {name: "i_win", label: MenuLabel("info", "Summe: $"+MenuSpan("#1ABC9C", win))},
+            {name: "a_submit", label: MenuLabel("action", MenuSpan("#E54363", "Verkaufen"))}
         ]
     }, (data, menu) => {
         OpenValidateMenu((check) => {
             if (!check) {return}
-            ESX.TriggerServerCallback("esx_greenhouse?SellCargo", (selled, item, weight, price) => {
+            ESX.TriggerServerCallback("esx_greenhouse?SellCargo", (selled, item, amount, weight, price) => {
                 if (selled) {
                     _InitGreenhouseMainMenu(CurrentGreenhouse)
-                    GreenhouseNotify(`Du hast erfolgreich ~g~${weight}~w~g ~g~${item}~w~ für $~g~${price}~w~ verkauft.\n\nDas Geld stecke ich dir mal zu, unsere Banküberweisungen funktionieren noch nicht.`)
+                    console.log(amount * weight)
+                    GreenhouseNotify(`Du hast erfolgreich ~g~${(amount * weight).toFixed(2)}~w~g ~g~${item}~w~ für $~g~${price.toFixed(2)}~w~ verkauft.\n\nDas Geld stecke ich dir mal zu, unsere Banküberweisungen funktionieren noch nicht.`)
                     return
                 }
                 GreenhouseNotify(`Der Verkauf war nicht erfolgreich.`)
@@ -348,16 +353,17 @@ function OpenShopMenu() {
     var elements:MenuElement[] = [
         {
             name: "weight",
-            label: "[<span style='color:#1ABC9C'>i</span>] Platzverbrauch: <span style='color:#1ABC9C'>"+currWeight.toLocaleString("us-US")+"</span> / <span style='color:#E54363'>"+CurrentGreenhouse.maxCargo.toLocaleString("us-US")+"</span>g",
+            label: MenuLabel("info", "Platzverbrauch:"+MenuSpan("#1ABC9C", currWeight.toFixed(2)+" / "+MenuSpan("#E54363", CurrentGreenhouse.maxCargo.toFixed(2)+"g"))),
             type: "default",
         }
+        
     ]
 
     for (let i in CurrentGreenhouse.data.plants) {
         let obj = CurrentGreenhouse.data.plants[i]
         elements.push({
             name: obj.pgh_p_name,
-            label: "<span style='color:#1ABC9C'>"+(1*obj.p_weight)+"</span>g "+obj.pgh_p_label+"samen $<span style='color:#E54363'>"+(1*obj.pgh_p_price)+"</span>",
+            label: MenuSpan("#1ABC9C", (1*obj.p_weight)+"g ")+ obj.pgh_p_label+"samen $" + MenuSpan("#E54363", (1*obj.pgh_p_price)),
             type: "slider",
             min: 1,
             max: 10,
@@ -406,10 +412,10 @@ function OpenShopBuyMenu(object) {
     ESX.UI.Menu.Open("default", GetCurrentResourceName(), "shop_buy_menu", {
         title: "Kaufbestätigung",
         elements: [
-            {name: "i_item", label: "[<span style='color:#1ABC9C'>i</span>] Gegenstand: <span style='color:#1ABC9C'>"+object.data.pgh_p_label+"samen</span>", type: "default"},
-            {name: "i_selected", label: "[<span style='color:#1ABC9C'>i</span>] Menge: <span style='color:#1ABC9C'>"+crop+"</span>g", type: "default"},
-            {name: "i_win", label: "[<span style='color:#1ABC9C'>i</span>] Summe: $<span style='color:#1ABC9C'>"+price+"</span>", type: "default"},
-            {name: "a_submit", label: "[<span style='color:#E54363'>&#10095;</span>] <span style='color:#E54363'>Kaufen</span>"}
+            {name: "i_item", label: MenuLabel("info", "Gegenstand: "+MenuSpan("#1ABC9C", object.data.pgh_p_label))},
+            {name: "i_selected", label: MenuLabel("info", "Menge: "+MenuSpan("#1ABC9C", crop)+"g")},
+            {name: "i_win", label: MenuLabel("info", "Summe: $"+MenuSpan("#1ABC9C", price))},
+            {name: "a_submit", label: MenuLabel("action", MenuSpan("#E54363", "Kaufen"))}
         ]
     }, (data, menu) => {
         OpenValidateMenu((check) => {
@@ -433,15 +439,29 @@ function OpenShopBuyMenu(object) {
 
 //#region Buy / Sell Greenhouse Menu
 function OpenBuyGreenhouseMenu() {
+
+    var l_items = "keine"
+    if (CurrentGreenhouse.data.plants.length != 0) {
+        l_items = ""
+        for (const i in CurrentGreenhouse.data.plants) {
+            var obj = CurrentGreenhouse.data.plants[i]
+            if (parseInt(i) < (CurrentGreenhouse.data.plants.length - 1)) {
+                l_items += obj.pgh_p_label+", "
+                continue
+            }
+            l_items += obj.pgh_p_label
+        }
+    }
+
     ESX.UI.Menu.Open("default", GetCurrentResourceName(), "greenhouse_buy_menu", {
         title: "Gewächshaus",
         elements: [
-            {name: "l_name", label: "[<span style='color:#1ABC9C'>i</span>] Bezeichnung: <span style='color:#1ABC9C'>"+CurrentGreenhouse.label+"</span>"},
-            {name: "l_cargo", label: "[<span style='color:#1ABC9C'>i</span>] Lagerkapazität: <span style='color:#1ABC9C'>"+(CurrentGreenhouse.maxCargo/1000).toLocaleString("us-US")+"</span> kg"},
-            {name: "l_items", label: "[<span style='color:#1ABC9C'>i</span>] Anbauoptionen: <span style='color:#1ABC9C'>"+"keine"+"</span>"},
-            {name: "l_space", label: "[<span style='color:#1ABC9C'>i</span>] Stellplätze: <span style='color:#1ABC9C'>"+CurrentGreenhouse.zones+"</span>"},
-            {name: "l_price", label: "[<span style='color:#1ABC9C'>i</span>] Preis: $ <span style='color:#1ABC9C'>"+CurrentGreenhouse.price.toLocaleString("us-US")+"</span>"},
-            {name: "a_buy", label: "[<span style='color:#E54363'>&#10095;</span>] <span style='color:#E54363'>Kaufen</span>"}
+            {name: "l_name", label:  MenuLabel("info", "Bezeichnung: "+MenuSpan("#1ABC9C", CurrentGreenhouse.label))},
+            {name: "l_cargo", label: MenuLabel("info", "Lagerkapazität: "+MenuSpan("#1ABC9C", (CurrentGreenhouse.maxCargo/1000).toFixed(2)+"kg"))},
+            {name: "l_items", label: MenuLabel("info", "Anbauoptionen: "+MenuSpan("#1ABC9C", l_items))},
+            {name: "l_space", label: MenuLabel("info", "Stellplätze: "+MenuSpan("#1ABC9C", CurrentGreenhouse.data.zones.length))},
+            {name: "l_price", label: MenuLabel("info", "Preis: $"+MenuSpan("#1ABC9C", CurrentGreenhouse.price.toFixed(2)))},
+            {name: "a_buy", label: MenuLabel("action", MenuSpan("#E54363", "Kaufen"))}
         ]
     }, (data, menu) => {
         if (data.current.name == "a_buy") {
@@ -450,7 +470,7 @@ function OpenBuyGreenhouseMenu() {
                 ESX.TriggerServerCallback('esx_greenhouse?BuyGreenhouse', (buyed) => {
                     if (buyed) {
                         _InitGreenhouseMainMenu(CurrentGreenhouse)
-                        GreenhouseNotify("Sie haben dieses Objekt erfolgreich für $~g~"+CurrentGreenhouse.price.toLocaleString("us-US")+" ~r~gekauft~w~.")
+                        GreenhouseNotify("Sie haben dieses Objekt erfolgreich für $~g~"+CurrentGreenhouse.price.toFixed(2)+" ~r~gekauft~w~.")
                         return
                     }
                     GreenhouseNotify("Sie haben nicht genügend Geld dabei, um dieses Objekt zu kaufen")
@@ -489,16 +509,16 @@ function OpenSellGreenhouseMenu() {
         }
     }
 
-    ESX.UI.Menu.Open("default", GetCurrentResourceName(), "sell_menu", {
+    ESX.UI.Menu.Open("default", GetCurrentResourceName(), "greenhouse_sell_menu", {
         title: "Gewächshaus",
         elements: [
-            {name: "l_name", label: "Bezeichnung: <span style='color:#1ABC9C'>"+CurrentGreenhouse.label+"</span>", type: "default"},
-            {name: "l_cargo", label: "Lagerkapazität: <span style='color:#1ABC9C'>"+(CurrentGreenhouse.maxCargo/1000).toLocaleString("us-US")+"</span> kg", type: "default"},
-            {name: "l_items", label: "Anbauoptionen: <span style='color:#1ABC9C'>"+l_items+"</span>", type: "default"},
-            {name: "l_space", label: "Stellplätze: <span style='color:#1ABC9C'>"+CurrentGreenhouse.data.zones.length+"</span>", type: "default"},
-            {name: "l_price", label: "Preis: $ <span style='color:#1ABC9C'>"+CurrentGreenhouse.price.toFixed(2)+"</span>", type: "default"},
-            {name: "l_extra", label: "Lagerverkauf: $ <span style='color:#1ABC9C'>"+l_extra.toFixed(2)+"</span>", type: "default"},
-            {name: "a_sell", label: "<span style='color:#E54363'>Verkaufen</span>", arrow: true}
+            {name: "l_name", label:  MenuLabel("info", "Bezeichnung: "+MenuSpan("#1ABC9C", CurrentGreenhouse.label))},
+            {name: "l_cargo", label: MenuLabel("info", "Lagerkapazität: "+MenuSpan("#1ABC9C", (CurrentGreenhouse.maxCargo/1000).toFixed(2)+"kg"))},
+            {name: "l_items", label: MenuLabel("info", "Anbauoptionen: "+MenuSpan("#1ABC9C", l_items))},
+            {name: "l_space", label: MenuLabel("info", "Stellplätze: "+MenuSpan("#1ABC9C", CurrentGreenhouse.data.zones.length))},
+            {name: "l_price", label: MenuLabel("info", "Preis: $"+MenuSpan("#1ABC9C", CurrentGreenhouse.price.toFixed(2)))},
+            {name: "l_extra", label: MenuLabel("info", "Lagerverkauf: $"+MenuSpan("#1ABC9C", l_extra.toFixed(2)))},
+            {name: "a_sell", label: MenuLabel("action", MenuSpan("#E54363", "Verkaufen"))}
         ]
     }, (data, menu) => {
         if (data.current.name == "a_sell") {
@@ -509,10 +529,10 @@ function OpenSellGreenhouseMenu() {
                     if (selled) {
                         _InitGreenhouseMainMenu(CurrentGreenhouse)
                         if (extra > 0) {
-                            GreenhouseNotify("Sie haben dieses Objekt erfolgreich für $~g~"+price.toLocaleString("us-US")+" ~r~verkauft~w~. Zusätzlich haben Sie, aufgrund noch vorhandener Waren im Lager, $~g~"+extra.toLocaleString("us-US")+" ~r~erhalten~w~.")
+                            GreenhouseNotify("Sie haben dieses Objekt erfolgreich für $~g~"+price.toFixed(2)+" ~r~verkauft~w~. Zusätzlich haben Sie, aufgrund noch vorhandener Waren im Lager, $~g~"+extra.toFixed(2)+" ~r~erhalten~w~.")
                             return
                         }
-                        GreenhouseNotify("Sie haben dieses Objekt erfolgreich für $~g~"+price.toLocaleString("us-US")+" ~r~verkauft~w~.")
+                        GreenhouseNotify("Sie haben dieses Objekt erfolgreich für $~g~"+price.toFixed(2)+" ~r~verkauft~w~.")
                         return
                     }
                     _InitGreenhouseMainMenu(CurrentGreenhouse)
@@ -532,8 +552,8 @@ function OpenValidateMenu(cb) {
     ESX.UI.Menu.Open("default", GetCurrentResourceName(), "validate_menu", {
         title: "Validierung",
         elements: [
-            {name: "approve", label: "Bestätigen"},
-            {name: "cancel", label: "Abbrechen"}
+            {name: "approve", label: MenuLabel("action", MenuSpan("#1ABC9C", "Bestätigen"))},
+            {name: "cancel", label: MenuLabel("action", MenuSpan("#E54363", "Abbrechen"))}
         ]
     }, (data, menu) => {
         switch (data.current.name) {
@@ -550,6 +570,21 @@ function OpenValidateMenu(cb) {
 
 function GreenhouseNotify(msg) {
     ESX.ShowAdvancedNotification("Mrs. Thornhill", "Gewächshausverwaltung", msg, "CHAR_MRS_THORNHILL", 1, false, true)
+}
+
+function MenuLabel(type: string, msg: string | number) {
+    var label = ""
+    switch (type) {
+        case "info": label += "[<span style='color:#1ABC9C'>i</span>] "; break;
+        case "action": label += "[<span style='color:#E54363'>&#10095;</span>] "; break;
+        default: break;
+    }
+    label += msg
+    return label
+}
+
+function MenuSpan(color: string, msg: string | number) {
+    return "<span style='color:"+color+"'>"+msg+"</span>"
 }
 
 
