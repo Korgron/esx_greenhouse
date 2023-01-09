@@ -5,6 +5,7 @@ With Greenhouses, you can buy seeds and plant them. These planted seeds will gro
 
 [![License GNU-GPL v3](https://img.shields.io/github/license/korgron/esx_greenhouse?style=for-the-badge)](https://github.com/Korgron/esx_greenhouse/blob/master/LICENSE "License")
 [![Lates release](https://img.shields.io/github/v/release/korgron/esx_greenhouse?style=for-the-badge)](https://github.com/Korgron/esx_greenhouse/releases/latest)
+[![Discord](https://img.shields.io/discord/474234521781272586?label=Discord&logo=Discord&style=for-the-badge)](https://discord.gg/C7Ah4qCTaM)
 
 ## Server Requirements
 
