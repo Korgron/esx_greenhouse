@@ -9,7 +9,6 @@
 
 
 -- Exportiere Datenbank Struktur für esx_legacy
-DROP DATABASE IF EXISTS `esx_legacy`;
 CREATE DATABASE IF NOT EXISTS `esx_legacy` /*!40100 DEFAULT CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci */;
 USE `esx_legacy`;
 
