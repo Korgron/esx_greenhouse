@@ -3,7 +3,7 @@
 This FiveM ESX script is adding Greenhouses to your Server.
 With Greenhouses, you can buy seeds and plant them. These planted seeds will grow over time into plants that can be harvested and sold.
 
-[![License GNU-GPL v3](https://img.shields.io/github/license/Korgron/esx_greenhouse?style=for-the-badge)](https://github.com/Korgron/esx_greenhouse/blob/main/LICENSE "License")
+[![License GNU-GPL v3](https://img.shields.io/github/license/Korgron/esx_greenhouse?style=for-the-badge)](https://github.com/Korgron/esx_greenhouse/blob/master/LICENSE "License")
 [![Lates release](https://img.shields.io/github/v/release/Korgron/esx_greenhouse?style=for-the-badge)](https://github.com/Korgron/esx_greenhouse/releases/latest)
 
 ## Server Requirements
