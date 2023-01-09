@@ -37,13 +37,13 @@ With Greenhouses, you can buy seeds and plant them. These planted seeds will gro
 
 - execute the `build.sql` file in `esx_greenhouse/sql` to create all required sql tables
 
-- add to your server.cfg the following line at the bootom of your start order
+- add to your server.cfg the following line at the bottom of your start order
   
   ```cfg
   ensure esx_greenhouse
   ```
 
-- Make sure that `Config.Multichar` is enabled in `esx_extended/config.lua` 
+- Make sure that `Config.Multichar` is enabled in `es_extended/config.lua` 
   
   ```lua
   Config.Multichar = true
